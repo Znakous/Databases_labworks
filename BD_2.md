@@ -1,5 +1,5 @@
 Task 1
-```
+```sql
 select pr.name, cat.name from production.product as pr
 join
 production.product_subcategory as subcat on pr.product_subcategory_id = subcat.product_subcategory_id
@@ -8,14 +8,14 @@ production.product_category as cat on subcat.product_category_id = cat.product_c
 where pr.color = 'Red' and pr.list_price >= 100
 ```
 Task 2
-```
+```sql
 select s1.name from production.product_subcategory as s1
 join
 production.product_subcategory as s2
 on s1.name = s2.name and s1.product_subcategory_id != s2.product_subcategory_id
 ```
 Task 3
-```
+```sql
 select cat.name, count(pr.product_id) 
 from production.product as pr
 join
@@ -26,7 +26,7 @@ on subcat.product_category_id = cat.product_category_id
 group by cat.product_category_id
 ```
 Task 4
-```
+```sql
 select subcat.name, count(pr.product_id) 
 from production.product as pr
 join
@@ -35,7 +35,7 @@ on pr.product_subcategory_id = subcat.product_subcategory_id
 group by subcat.product_subcategory_id
 ```
 Task 5
-```
+```sql
 select subcat.name 
 from production.product as pr
 join
@@ -46,7 +46,7 @@ order by count(pr.product_id) desc
 limit 3
 ```
 Task 6
-```
+```sql
 select subcat.name, max(pr.list_price)
 from production.product as pr
 join
@@ -56,7 +56,7 @@ where pr.color = 'Red'
 group by subcat.product_subcategory_id
 ```
 Task 7
-```
+```sql
 select v_n.name, count(v.product_id)
 from purchasing.product_vendor as v
 join
@@ -65,7 +65,7 @@ on v.business_entity_id = v_n.business_entity_id
 group by v_n.business_entity_id
 ```
 Task 8
-```
+```sql
 select p.name 
 from production.product as p
 join
@@ -75,7 +75,7 @@ group by p.product_id
 having count(distinct v.business_entity_id) > 1
 ```
 Task 9
-```
+```sql
 select p.name 
 from production.product as p
 join
@@ -86,7 +86,7 @@ order by sum(ord.order_qty) desc
 limit 1
 ```
 Task 10
-```
+```sql
 select cat.name 
 from production.product as p
 join
@@ -102,7 +102,7 @@ order by sum(ord.order_qty) desc
 limit 1
 ```
 Task 11
-```
+```sql
 select cat.name, 
 	count(distinct subcat.product_subcategory_id), 
 	count(distinct p.product_id)
@@ -118,7 +118,7 @@ on p.product_id = ord.product_id
 group by cat.product_category_id
 ```
 Task 12
-```
+```sql
 select v_info.credit_rating, count(distinct v.product_id)
 from purchasing.product_vendor as v
 join purchasing.vendor as v_info
@@ -126,7 +126,7 @@ on v.business_entity_id = v_info.business_entity_id
 group by v_info.credit_rating
 ```
 Task 13
-```
+```sql
 select p1.name from production.product as p1
 join
 (select distinct(p2.list_price) from production.product as p2
@@ -135,7 +135,7 @@ on p1.list_price = per_select.list_price
 ```
 Task 14
 Адекватное решение
-```
+```sql
 select v_info.name from (
 (select v.business_entity_id 
 from purchasing.product_vendor as v
@@ -147,7 +147,7 @@ purchasing.vendor as v_info
 on best.business_entity_id = v_info.business_entity_id)
 ```
 Если реально учитывать одинаковое количество товаров у разных поставщиков (типа если количества [1, 2, 3, 3, 4, 5] и вывести надо [3, 3, 4, 5], то как-то так
-```
+```sql
 select v_info.name, prim.count_pr from 
 ((select v.business_entity_id as ent_id, 
 	count(v.product_id) as count_pr
@@ -166,7 +166,7 @@ on prim.ent_id = v_info.business_entity_id)
 order by count_pr desc
 ```
 Task 15
-```
+```sql
 select v_info.name, 
 	count(subcat.product_subcategory_id) 
 from
@@ -181,7 +181,7 @@ on v.business_entity_id = v_info.business_entity_id
 group by v_info.business_entity_id
 ```
 Task 16
-```
+```sql
 select p1.name
 from 
 production.product as p1
