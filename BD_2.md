@@ -92,7 +92,8 @@ from production.product as p
 join
 production.product_subcategory as subcat
 on p.product_subcategory_id = subcat.product_subcategory_id
-join production.product_category as cat
+join
+production.product_category as cat
 on subcat.product_category_id = cat.product_category_id
 join
 sales.sales_order_detail as ord
