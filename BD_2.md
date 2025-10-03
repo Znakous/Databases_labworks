@@ -169,16 +169,15 @@ order by count_pr desc
 Task 15
 ```sql
 select v_info.name, 
-	count(subcat.product_subcategory_id) 
+	count(distinct p.product_subcategory_id) 
 from
 (purchasing.product_vendor as v
 join production.product as p on v.product_id = p.product_id
-join 
-production.product_subcategory as subcat
-on p.product_subcategory_id = subcat.product_subcategory_id)
+)
 join 
 purchasing.vendor as v_info 
-on v.business_entity_id = v_info.business_entity_id 
+on v.business_entity_id = v_info.business_entity_id
+where p.product_subcategory_id is not null
 group by v_info.business_entity_id
 ```
 Task 16
