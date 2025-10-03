@@ -1,4 +1,6 @@
-Task 1
+## Task 1
+
+*Найти и вывести на экран название продуктов и название категорий товаров, к которым относится этот продукт, с учетом того, что в выборку попадут только товары с цветом Red и ценой не менее 100.*
 ```sql
 select pr.name, cat.name from production.product as pr
 join
@@ -7,14 +9,16 @@ join
 production.product_category as cat on subcat.product_category_id = cat.product_category_id
 where pr.color = 'Red' and pr.list_price >= 100
 ```
-Task 2
+## Task 2
+*Вывести на экран названия подкатегорий с совпадающими именами.*
 ```sql
 select s1.name from production.product_subcategory as s1
 join
 production.product_subcategory as s2
 on s1.name = s2.name and s1.product_subcategory_id != s2.product_subcategory_id
 ```
-Task 3
+## Task 3
+*Вывести на экран название категорий и количество товаров в данной категории.*
 ```sql
 select cat.name, count(pr.product_id) 
 from production.product as pr
@@ -25,7 +29,8 @@ join production.product_category as cat
 on subcat.product_category_id = cat.product_category_id
 group by cat.product_category_id
 ```
-Task 4
+## Task 4
+*Вывести на экран название подкатегории, а также количество товаров в данной подкатегории с учетом ситуации, что могут существовать подкатегории с одинаковыми именами.*
 ```sql
 select subcat.name, count(pr.product_id) 
 from production.product as pr
@@ -34,7 +39,8 @@ production.product_subcategory as subcat
 on pr.product_subcategory_id = subcat.product_subcategory_id
 group by subcat.product_subcategory_id
 ```
-Task 5
+## Task 5
+*Вывести на экран название первых трех подкатегорий с небольшим количеством товаров.*
 ```sql
 select subcat.name 
 from production.product as pr
@@ -45,7 +51,9 @@ group by subcat.product_subcategory_id
 order by count(pr.product_id) desc
 limit 3
 ```
-Task 6
+## Task 6
+*Вывести на экран название подкатегории и максимальную цену продукта с цветом Red в этой подкатегории.*
+Если не надо учитывать, что в подкатегории может не быть product с цветом Red
 ```sql
 select subcat.name, max(pr.list_price)
 from production.product as pr
@@ -55,7 +63,19 @@ on pr.product_subcategory_id = subcat.product_subcategory_id
 where pr.color = 'Red'
 group by subcat.product_subcategory_id
 ```
-Task 7
+Если надо учесть такие случаи
+```sql
+select subcat.name, max(pr.list_price)
+from (
+production.product_subcategory as subcat
+left join
+(select * from production.product as pr
+where pr.color = 'Red') as pr
+on pr.product_subcategory_id = subcat.product_subcategory_id)
+group by subcat.product_subcategory_id
+```
+## Task 7
+*Вывести на экран название поставщика и количество товаров, которые он поставляет.*
 ```sql
 select v_n.name, count(v.product_id)
 from purchasing.product_vendor as v
@@ -64,7 +84,8 @@ purchasing.vendor as v_n
 on v.business_entity_id = v_n.business_entity_id
 group by v_n.business_entity_id
 ```
-Task 8
+## Task 8
+*Вывести на экран название товаров, которые поставляются более чем одним поставщиком.*
 ```sql
 select p.name 
 from production.product as p
@@ -74,7 +95,8 @@ on p.product_id = v.product_id
 group by p.product_id
 having count(distinct v.business_entity_id) > 1
 ```
-Task 9
+## Task 9
+*Вывести на экран название самого продаваемого товара.*
 ```sql
 select p.name 
 from production.product as p
@@ -85,7 +107,8 @@ group by p.product_id
 order by sum(ord.order_qty) desc
 limit 1
 ```
-Task 10
+## Task 10
+*Вывести на экран название категории, товары из которой продаются наиболее активно.*
 ```sql
 select cat.name 
 from production.product as p
@@ -102,7 +125,8 @@ group by cat.product_category_id
 order by sum(ord.order_qty) desc
 limit 1
 ```
-Task 11
+## Task 11
+*Вывести на экран названия категорий, количество подкатегорий и количество товаров в них.*
 ```sql
 select cat.name, 
 	count(distinct subcat.product_subcategory_id), 
@@ -118,7 +142,8 @@ sales.sales_order_detail as ord
 on p.product_id = ord.product_id
 group by cat.product_category_id
 ```
-Task 12
+## Task 12
+*Вывести на экран номер кредитного рейтинга и количество товаров, поставляемых компаниями, имеющими этот кредитный рейтинг.*
 ```sql
 select v_info.credit_rating, count(distinct v.product_id)
 from purchasing.product_vendor as v
@@ -126,7 +151,8 @@ join purchasing.vendor as v_info
 on v.business_entity_id = v_info.business_entity_id
 group by v_info.credit_rating
 ```
-Task 13
+## Task 13
+*Найти первые 10 процентов самых дорогих товаров, с учетом ситуации, когда цены у некоторых товаров могут совпадать.*
 ```sql
 select p1.name from production.product as p1
 join
@@ -134,7 +160,8 @@ join
 limit ((select count(distinct(p3.list_price)) from production.product as p3) * 0.1)) as per_select
 on p1.list_price = per_select.list_price
 ```
-Task 14
+## Task 14
+*Найти первых трех поставщиков, отсортированных по количеству поставляемых товаров, с учетом ситуации, что количество поставляемых товаров может совпадать для разных поставщиков.*
 Адекватное решение
 ```sql
 select v_info.name from (
@@ -166,7 +193,8 @@ purchasing.vendor as v_info
 on prim.ent_id = v_info.business_entity_id)
 order by count_pr desc
 ```
-Task 15
+## Task 15
+*Найти для каждого поставщика количество подкатегорий продуктов, к которым относится продукты, поставляемые им, без учета ситуации, когда продукт не относится ни к какой подкатегории.*
 ```sql
 select v_info.name, 
 	count(distinct p.product_subcategory_id) 
@@ -180,7 +208,8 @@ on v.business_entity_id = v_info.business_entity_id
 where p.product_subcategory_id is not null
 group by v_info.business_entity_id
 ```
-Task 16
+## Task 16
+*Проверить, есть ли продукты с одинаковым названием, если есть, то вывести эти названия. (Решение через JOIN)*
 ```sql
 select p1.name
 from 
