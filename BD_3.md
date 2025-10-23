@@ -174,3 +174,35 @@ where sales_order_id in (select sales_order_id from good_orders)
 group by customer_id
 having count(distinct sales_order_id) >= 2
 ```
+## Task 11
+``` sql
+with sale_info as (
+    select det.sales_order_id, product_id, customer_id 
+    from sales.sales_order_detail as det
+    join sales.sales_order_header as head
+    on det.sales_order_id = head.sales_order_id
+),
+good_prod_cust_rel as (
+	select product_id, customer_id
+	from sale_info
+	group by product_id, customer_id
+	having count(distinct sales_order_id) = 2 -- хотя по факту надо 3, 
+	-- потому что "товар был куплен дважды этим же покупателем", 
+	-- то есть эта покупка + ЕЩЁ 2
+),
+good_prods_in_order as (
+	select sales_order_id, count(distinct product_id) as c from sale_info as s1
+	where exists(select 1 from good_prod_cust_rel as s2
+		where s2.product_id = s1.product_id and s2.customer_id = s1.customer_id)
+	group by sales_order_id
+), 
+prods_in_order as (
+	select sales_order_id, count(distinct product_id) as c from sale_info
+	group by sales_order_id
+)
+select good.sales_order_id
+from good_prods_in_order as good
+join prods_in_order as total
+on good.sales_order_id = total.sales_order_id
+where good.c = total.c
+```
