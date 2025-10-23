@@ -262,3 +262,44 @@ select customer_id, avg(c) from
 )
 group by customer_id
 ```
+## Task 16
+```sql
+with sale_info as (
+    select det.sales_order_id, product_id, (
+		select customer_id
+		from sales.sales_order_header as head
+		where det.sales_order_id = head.sales_order_id
+	) as customer_id
+    from sales.sales_order_detail as det
+), 
+prod_cust as (
+	select product_id, customer_id, count(product_id) as c
+	from sale_info as s1
+	group by customer_id, product_id
+),
+cust as (
+	select customer_id, count(product_id) as c
+	from sale_info as s2
+	group by customer_id
+)
+select prod_cust.product_id, prod_cust.customer_id, cast (prod_cust.c as float) / cust.c
+from (
+	prod_cust
+	join cust
+	on prod_cust.customer_id = cust.customer_id
+)
+```
+## Task 17
+```sql
+select product_id, 
+	(select count(distinct sales_order_id)
+	from sales.sales_order_detail as s2
+	where s2.product_id = p.product_id),
+	(select count(distinct customer_id) 
+	from sales.sales_order_header as head
+	where head.sales_order_id in 
+		(select sales_order_id from sales.sales_order_detail as det
+		where det.product_id = p.product_id)
+	)
+from production.product as p
+```
