@@ -206,3 +206,59 @@ join prods_in_order as total
 on good.sales_order_id = total.sales_order_id
 where good.c = total.c
 ```
+
+## Task 12
+```sql
+with sale_info as (
+    select det.sales_order_id, product_id, (
+		select customer_id
+		from sales.sales_order_header as head
+		where det.sales_order_id = head.sales_order_id
+	) as customer_id
+    from sales.sales_order_detail as det
+)
+select product_id
+from sale_info as s2
+group by product_id
+having count(distinct customer_id) >= 3
+```
+## Task 13
+```sql
+with good_prods as (
+	select product_id from sales.sales_order_detail
+	group by product_id
+	having count(distinct sales_order_id) > 3
+)
+select product_subcategory_id from production.product
+where product_id in (select product_id from good_prods)
+group by product_subcategory_id
+having count (distinct product_id) > 3
+```
+## Task 14
+```sql
+select product_id from production.product
+where product_id in (
+	select product_id from sales.sales_order_detail
+	group by product_id
+	having count(distinct sales_order_id) <= 3
+) and product_id in (
+	select product_id from sales.sales_order_detail as det
+	group by product_id, (
+		select customer_id from sales.sales_order_header as head
+		where head.sales_order_id = det.sales_order_id
+		limit 1)
+	having count(distinct sales_order_id) <= 1
+)
+```
+## Task 15
+```sql
+select customer_id, avg(c) from
+	(select (
+		select customer_id from sales.sales_order_header as head
+		where head.sales_order_id = det.sales_order_id), 
+	count(distinct product_id) as c
+	from sales.sales_order_detail as det
+	group by customer_id, sales_order_id
+)
+group by customer_id
+```
