@@ -50,7 +50,25 @@ where list_price > (
 Я отказываюсь это решать
 
 ## Task 6
-
+```sql
+with sale_info as (
+    select det.sales_order_id, product_id, customer_id 
+    from sales.sales_order_detail as det
+    join sales.sales_order_header as head
+    on det.sales_order_id = head.sales_order_id
+),
+from_prod as (
+	select customer_id, count(distinct sales_order_id) as c from sale_info
+	group by customer_id
+),
+from_cust_and_prod as (
+	select product_id, customer_id, count(distinct sales_order_id) as c from sale_info
+	group by product_id, customer_id
+)
+select distinct(full_.product_id) from from_cust_and_prod as full_
+join from_prod as part_ on full_.customer_id = part_.customer_id
+where full_.c = part_.c
+```
 ## Task 7
 ```sql
 with sale_info as (
@@ -70,4 +88,89 @@ from_cust_and_prod as (
 select distinct(full_.customer_id) from from_cust_and_prod as full_
 join from_cust as part_ on full_.customer_id = part_.customer_id
 where full_.c = part_.c
+```
+
+## Task 8
+```sql
+
+with sale_info as (
+    select det.sales_order_id, product_id, customer_id 
+    from sales.sales_order_detail as det
+    join sales.sales_order_header as head
+    on det.sales_order_id = head.sales_order_id
+),
+from_prod as (
+	select product_id, count(distinct customer_id) as c from sale_info
+	group by product_id
+)
+select product_id from from_prod
+where c <= 3
+```
+
+## Task 9
+```sql
+
+with sale_info as (
+    select det.sales_order_id, product_id, customer_id 
+    from sales.sales_order_detail as det
+    join sales.sales_order_header as head
+    on det.sales_order_id = head.sales_order_id
+),
+prod_categories as (
+	select product_id, product_category_id as category, list_price
+	from production.product as pr
+	join production.product_subcategory as cat
+	on pr.product_subcategory_id = cat.product_subcategory_id
+),
+max_in_cat as (
+	select product_id from prod_categories as cur_cat
+	where list_price = (
+		select max(list_price) from prod_categories as cat
+		where cat.category = cur_cat.category)
+),
+good_orders as (
+	select distinct sales_order_id from sales.sales_order_detail as det
+	where product_id = any(select product_id from max_in_cat)
+),
+prod_to_any as (
+	select product_id as prod_id, count(distinct sales_order_id) as c 
+	from sales.sales_order_detail
+	group by product_id
+),
+prod_to_good as (
+	select product_id as prod_id, count(distinct sales_order_id) as c 
+	from sales.sales_order_detail
+	where sales_order_id in (select sales_order_id from good_orders)
+	group by product_id
+)
+select good_.prod_id from 
+prod_to_any as any_
+join prod_to_good as good_
+on any_.prod_id = good_.prod_id
+where any_.c = good_.c
+```
+
+## Task 10
+```sql
+with sale_info as (
+    select det.sales_order_id, product_id, customer_id 
+    from sales.sales_order_detail as det
+    join sales.sales_order_header as head
+    on det.sales_order_id = head.sales_order_id
+),
+bought_atl_4_times as (
+	select product_id from sale_info
+	group by product_id
+	having count(distinct customer_id) >= 4
+),
+good_orders as (
+	select sales_order_id from sale_info
+	where product_id in (select product_id from bought_atl_4_times)
+	group by sales_order_id
+	having count(distinct product_id) >= 3
+)
+select customer_id from sale_info
+where sales_order_id in (select sales_order_id from good_orders)
+group by customer_id
+having count(distinct sales_order_id) >= 2
 ```
